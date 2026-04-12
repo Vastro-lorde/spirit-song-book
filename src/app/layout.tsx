@@ -14,11 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RCCG Hymn Book",
+  title: "Spirit Song Book",
   description:
-    "Browse and search hymns from the Redeemed Christian Church of God hymnal.",
+    "Access your favourite hymn books — search, read, and share hymns anytime, anywhere.",
   manifest: "/manifest.json",
-  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "RCCG Hymns" },
+  appleWebApp: { capable: true, statusBarStyle: "black-translucent", title: "Spirit Song Book" },
 };
 
 export const viewport: Viewport = {

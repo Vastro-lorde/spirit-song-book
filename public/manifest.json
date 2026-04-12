@@ -1,7 +1,7 @@
 {
-  "name": "RCCG Hymn Book",
-  "short_name": "RCCG Hymns",
-  "description": "Browse and search hymns from the Redeemed Christian Church of God hymnal.",
+  "name": "Spirit Song Book",
+  "short_name": "Spirit Songs",
+  "description": "Access your favourite hymn books — search, read, and share hymns anytime, anywhere.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

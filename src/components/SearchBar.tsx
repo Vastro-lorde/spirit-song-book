@@ -25,7 +25,7 @@ export default function SearchBar() {
     }
     params.delete("page"); // reset pagination on new search
     startTransition(() => {
-      router.replace(`/?${params.toString()}`);
+      router.replace(`/hymns?${params.toString()}`);
     });
   }
 

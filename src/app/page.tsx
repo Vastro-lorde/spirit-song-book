@@ -1,174 +1,99 @@
-import SearchBar from "@/components/SearchBar";
-import HymnCard from "@/components/HymnCard";
-import type { IHymnSummary } from "@/types/hymn";
-import { connectDB } from "@/lib/db";
-import Hymn from "@/lib/models/hymn";
+import Image from "next/image";
+import Link from "next/link";
 
-interface HymnsResponse {
-  hymns: IHymnSummary[];
-  pagination: { page: number; limit: number; total: number; totalPages: number };
-}
+const songBooks = [
+  {
+    id: "rccg-hymns",
+    title: "RCCG Hymn Book",
+    subtitle: "The Redeemed Christian Church of God",
+    description: "Browse the complete collection of RCCG hymns — search by title, number, or lyrics.",
+    href: "/hymns",
+    logo: "/rccg_logo.png",
+  },
+];
 
-async function getHymns(params: {
-  q?: string;
-  category?: string;
-  page?: string;
-}): Promise<HymnsResponse> {
-  await connectDB();
-
-  const q = params.q?.trim() ?? "";
-  const category = params.category?.trim() ?? "";
-  const page = Math.max(1, Number(params.page) || 1);
-  const limit = 24;
-  const skip = (page - 1) * limit;
-
-  const filter: Record<string, unknown> = {};
-
-  if (q) {
-    const isNumeric = /^\d+$/.test(q);
-    if (isNumeric) {
-      filter.$or = [
-        { hymnNumber: Number(q) },
-        { $text: { $search: q } },
-      ];
-    } else {
-      filter.$text = { $search: q };
-    }
-  }
-  if (category) {
-    filter.category = category;
-  }
-
-  const projection = {
-    hymnNumber: 1,
-    title: 1,
-    author: 1,
-    category: 1,
-    _id: 0,
-  };
-
-  const [hymns, total] = await Promise.all([
-    Hymn.find(filter, projection)
-      .sort(q ? { score: { $meta: "textScore" } } : { hymnNumber: 1 })
-      .skip(skip)
-      .limit(limit)
-      .lean(),
-    Hymn.countDocuments(filter),
-  ]);
-
-  return {
-    hymns: hymns as IHymnSummary[],
-    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
-  };
-}
-
-async function getCategories(): Promise<string[]> {
-  await connectDB();
-
-  const categories: string[] = await Hymn.distinct("category", {
-    category: { $nin: [null, ""] },
-  });
-
-  return categories.sort();
-}
-
-export default async function Home({
-  searchParams,
-}: {
-  searchParams: Promise<Record<string, string | string[] | undefined>>;
-}) {
-  const params = await searchParams;
-  const q = typeof params.q === "string" ? params.q : undefined;
-  const category = typeof params.category === "string" ? params.category : undefined;
-  const page = typeof params.page === "string" ? params.page : undefined;
-
-  const [{ hymns, pagination }, categories] = await Promise.all([
-    getHymns({ q, category, page }),
-    getCategories(),
-  ]);
-
-  const currentPage = pagination.page;
-  const totalPages = pagination.totalPages;
-
+export default function Home() {
   return (
-    <main className="mx-auto w-full max-w-5xl flex-1 px-4 py-6">
-      {/* Search & Filter */}
-      <div className="mb-6 space-y-3">
-        <SearchBar />
+    <main className="flex flex-1 flex-col items-center px-4 py-12 sm:py-20">
+      {/* Hero */}
+      <section className="mx-auto max-w-2xl text-center">
+        <div className="mb-6 inline-flex items-center gap-2 rounded-full bg-rccg-gold/15 px-4 py-1.5 text-xs font-semibold tracking-wide text-rccg-gold">
+          <svg className="h-4 w-4" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 3v10.55A4 4 0 1 0 14 17V7h4V3h-6Z" />
+          </svg>
+          YOUR HYMNS, ONE PLACE
+        </div>
 
-        {/* Category filter */}
-        <div className="flex flex-wrap gap-2">
-          <a
-            href="/"
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              !category
-                ? "bg-rccg-navy text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20"
-            }`}
-          >
-            All
-          </a>
-          {categories.map((cat) => (
-            <a
-              key={cat}
-              href={`/?category=${encodeURIComponent(cat)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                category === cat
-                  ? "bg-rccg-green text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20"
-              }`}
+        <h2 className="text-3xl font-extrabold tracking-tight text-rccg-dark-navy sm:text-5xl dark:text-white">
+          Spirit Song Book
+        </h2>
+        <p className="mt-4 text-base text-gray-500 sm:text-lg dark:text-white/60">
+          Access your favourite hymn books — search, read, and share hymns
+          anytime, anywhere.
+        </p>
+      </section>
+
+      {/* Song Book Cards */}
+      <section className="mx-auto mt-12 w-full max-w-lg sm:mt-16">
+        <h3 className="mb-4 text-center text-xs font-semibold uppercase tracking-widest text-gray-400 dark:text-white/40">
+          Choose a Song Book
+        </h3>
+
+        <div className="grid gap-4">
+          {songBooks.map((book) => (
+            <Link
+              key={book.id}
+              href={book.href}
+              className="group relative overflow-hidden rounded-2xl border border-rccg-navy/10 bg-white p-6 shadow-sm transition-all hover:border-rccg-navy/30 hover:shadow-lg dark:border-white/10 dark:bg-white/5 dark:hover:border-white/25"
             >
-              {cat}
-            </a>
+              <div className="flex items-center gap-5">
+                {/* Logo */}
+                <div className="flex h-16 w-16 shrink-0 items-center justify-center rounded-xl bg-rccg-navy/5 dark:bg-white/10">
+                  <Image
+                    src={book.logo}
+                    alt={book.title}
+                    width={48}
+                    height={48}
+                    className="rounded-full"
+                  />
+                </div>
+
+                {/* Info */}
+                <div className="min-w-0 flex-1">
+                  <h4 className="text-lg font-bold text-rccg-dark-navy group-hover:text-rccg-navy transition-colors dark:text-white">
+                    {book.title}
+                  </h4>
+                  <p className="mt-0.5 text-xs text-gray-400 dark:text-white/50">
+                    {book.subtitle}
+                  </p>
+                  <p className="mt-1.5 text-sm text-gray-500 dark:text-white/60">
+                    {book.description}
+                  </p>
+                </div>
+
+                {/* Arrow */}
+                <svg
+                  className="h-6 w-6 shrink-0 text-gray-300 transition-transform group-hover:translate-x-1 group-hover:text-rccg-navy dark:text-white/20"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={2}
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" d="m8.25 4.5 7.5 7.5-7.5 7.5" />
+                </svg>
+              </div>
+
+              {/* Accent bar */}
+              <div className="absolute bottom-0 left-0 h-1 w-full bg-rccg-green scale-x-0 transition-transform origin-left group-hover:scale-x-100" />
+            </Link>
           ))}
         </div>
-      </div>
+      </section>
 
-      {/* Results info */}
-      <p className="mb-4 text-sm text-gray-500 dark:text-white/50">
-        {pagination.total} hymn{pagination.total !== 1 ? "s" : ""} found
-        {q && <span> for &ldquo;{q}&rdquo;</span>}
-        {category && <span> in {category}</span>}
+      {/* Coming Soon hint */}
+      <p className="mt-10 text-center text-xs text-gray-400 dark:text-white/30">
+        More song books coming soon.
       </p>
-
-      {/* Hymn grid */}
-      {hymns.length > 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-          {hymns.map((hymn) => (
-            <HymnCard key={hymn.hymnNumber} hymn={hymn} />
-          ))}
-        </div>
-      ) : (
-        <div className="py-20 text-center">
-          <p className="text-lg font-medium text-gray-400">No hymns found</p>
-          <p className="mt-1 text-sm text-gray-400">Try a different search term or category</p>
-        </div>
-      )}
-
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <nav className="mt-8 flex items-center justify-center gap-2">
-          {currentPage > 1 && (
-            <a
-              href={`/?page=${currentPage - 1}${q ? `&q=${encodeURIComponent(q)}` : ""}${category ? `&category=${encodeURIComponent(category)}` : ""}`}
-              className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20"
-            >
-              ← Previous
-            </a>
-          )}
-          <span className="px-3 text-sm text-gray-500 dark:text-white/50">
-            Page {currentPage} of {totalPages}
-          </span>
-          {currentPage < totalPages && (
-            <a
-              href={`/?page=${currentPage + 1}${q ? `&q=${encodeURIComponent(q)}` : ""}${category ? `&category=${encodeURIComponent(category)}` : ""}`}
-              className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20"
-            >
-              Next →
-            </a>
-          )}
-        </nav>
-      )}
     </main>
   );
 }
