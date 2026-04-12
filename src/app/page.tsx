@@ -1,6 +1,8 @@
 import SearchBar from "@/components/SearchBar";
 import HymnCard from "@/components/HymnCard";
 import type { IHymnSummary } from "@/types/hymn";
+import { connectDB } from "@/lib/db";
+import Hymn from "@/lib/models/hymn";
 
 interface HymnsResponse {
   hymns: IHymnSummary[];
@@ -12,24 +14,62 @@ async function getHymns(params: {
   category?: string;
   page?: string;
 }): Promise<HymnsResponse> {
-  const url = new URL("/api/hymns", process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000");
-  if (params.q) url.searchParams.set("q", params.q);
-  if (params.category) url.searchParams.set("category", params.category);
-  if (params.page) url.searchParams.set("page", params.page);
-  url.searchParams.set("limit", "24");
+  await connectDB();
 
-  const res = await fetch(url.toString(), { cache: "no-store" });
-  if (!res.ok) throw new Error("Failed to fetch hymns");
-  return res.json();
+  const q = params.q?.trim() ?? "";
+  const category = params.category?.trim() ?? "";
+  const page = Math.max(1, Number(params.page) || 1);
+  const limit = 24;
+  const skip = (page - 1) * limit;
+
+  const filter: Record<string, unknown> = {};
+
+  if (q) {
+    const isNumeric = /^\d+$/.test(q);
+    if (isNumeric) {
+      filter.$or = [
+        { hymnNumber: Number(q) },
+        { $text: { $search: q } },
+      ];
+    } else {
+      filter.$text = { $search: q };
+    }
+  }
+  if (category) {
+    filter.category = category;
+  }
+
+  const projection = {
+    hymnNumber: 1,
+    title: 1,
+    author: 1,
+    category: 1,
+    _id: 0,
+  };
+
+  const [hymns, total] = await Promise.all([
+    Hymn.find(filter, projection)
+      .sort(q ? { score: { $meta: "textScore" } } : { hymnNumber: 1 })
+      .skip(skip)
+      .limit(limit)
+      .lean(),
+    Hymn.countDocuments(filter),
+  ]);
+
+  return {
+    hymns: hymns as IHymnSummary[],
+    pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+  };
 }
 
 async function getCategories(): Promise<string[]> {
-  const res = await fetch(
-    new URL("/api/categories", process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000").toString(),
-    { cache: "no-store" },
-  );
-  if (!res.ok) return [];
-  return res.json();
+  await connectDB();
+
+  const categories: string[] = await Hymn.distinct("category", {
+    category: { $nin: [null, ""] },
+  });
+
+  return categories.sort();
 }
 
 export default async function Home({

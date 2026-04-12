@@ -10,7 +10,6 @@
     "migrate": "npx tsx scripts/migrate.ts"
   },
   "dependencies": {
-    "html2canvas-pro": "^2.0.2",
     "jspdf": "^4.2.1",
     "mongoose": "^9.4.1",
     "next": "16.2.3",

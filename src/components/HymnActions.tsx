@@ -1,11 +1,10 @@
 "use client";
 
-import { useRef, useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import type { IHymn } from "@/types/hymn";
 import HymnLyrics from "./HymnLyrics";
 
 export default function HymnActions({ hymn }: { hymn: IHymn }) {
-  const lyricsRef = useRef<HTMLDivElement>(null);
   const [copied, setCopied] = useState(false);
 
   /** Build plain-text version of the lyrics */
@@ -50,91 +49,6 @@ export default function HymnActions({ hymn }: { hymn: IHymn }) {
       setTimeout(() => setCopied(false), 2000);
     }
   }, [buildPlainText]);
-
-  /** Bake computed visual styles onto a cloned element tree so html2canvas
-   *  doesn't need to resolve any Tailwind / oklch CSS at all. */
-  const bakeStyles = useCallback((orig: HTMLElement, clone: HTMLElement) => {
-    const props = [
-      "color",
-      "background-color",
-      "background-image",
-      "background",
-      "border-color",
-      "border-left-color",
-      "border-right-color",
-      "border-top-color",
-      "border-bottom-color",
-      "border-width",
-      "border-style",
-      "border-radius",
-      "box-shadow",
-      "opacity",
-      "font-family",
-      "font-size",
-      "font-weight",
-      "font-style",
-      "line-height",
-      "letter-spacing",
-      "text-transform",
-      "white-space",
-      "padding",
-      "margin",
-      "display",
-      "flex-direction",
-      "flex-wrap",
-      "align-items",
-      "justify-content",
-      "gap",
-      "width",
-      "min-width",
-      "max-width",
-      "height",
-      "overflow",
-      "text-overflow",
-    ];
-
-    const origAll = [orig, ...orig.querySelectorAll("*")];
-    const cloneAll = [clone, ...clone.querySelectorAll("*")];
-
-    for (let i = 0; i < origAll.length; i++) {
-      const cs = window.getComputedStyle(origAll[i]);
-      const el = cloneAll[i] as HTMLElement;
-      for (const p of props) {
-        el.style.setProperty(p, cs.getPropertyValue(p));
-      }
-      // Strip classes so no stylesheet rules can override inline styles
-      el.removeAttribute("class");
-    }
-  }, []);
-
-  /** Download lyrics card as PNG image */
-  const handleDownloadImage = useCallback(async () => {
-    if (!lyricsRef.current) return;
-    const isDark = document.documentElement.classList.contains("dark");
-
-    // Build an off-screen clone with all visual styles baked inline
-    const clone = lyricsRef.current.cloneNode(true) as HTMLElement;
-    bakeStyles(lyricsRef.current, clone);
-    clone.style.position = "fixed";
-    clone.style.left = "-9999px";
-    clone.style.top = "0";
-    clone.style.width = lyricsRef.current.offsetWidth + "px";
-    document.body.appendChild(clone);
-
-    const html2canvas = (await import("html2canvas-pro")).default;
-    const canvas = await html2canvas(clone, {
-      backgroundColor: isDark ? "#0f1035" : "#ffffff",
-      scale: 2,
-      useCORS: true,
-    });
-
-    document.body.removeChild(clone);
-
-    const link = document.createElement("a");
-    link.download = `hymn-${hymn.hymnNumber}-${hymn.title.replace(/\s+/g, "-").toLowerCase()}.png`;
-    link.href = canvas.toDataURL("image/png");
-    link.click();
-  }, [hymn.hymnNumber, hymn.title, bakeStyles]);
 
   /** Download lyrics as PDF with title, sol-fa notes & italicized part labels */
   const handleDownloadPdf = useCallback(async () => {
@@ -258,18 +172,6 @@ export default function HymnActions({ hymn }: { hymn: IHymn }) {
           {copied ? "Copied!" : "Copy"}
         </button>
 
-        {/* Download Image */}
-        <button
-          onClick={handleDownloadImage}
-          title="Download as image"
-          className="inline-flex items-center gap-1.5 rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-600 transition-colors hover:bg-gray-50 dark:border-white/10 dark:bg-white/5 dark:text-white/70 dark:hover:bg-white/10"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-          </svg>
-          Image
-        </button>
-
         {/* Download PDF */}
         <button
           onClick={handleDownloadPdf}
@@ -283,10 +185,8 @@ export default function HymnActions({ hymn }: { hymn: IHymn }) {
         </button>
       </div>
 
-      {/* Lyrics card – referenced for image capture */}
-      <div ref={lyricsRef}>
-        <HymnLyrics hymn={hymn} />
-      </div>
+      {/* Lyrics card */}
+      <HymnLyrics hymn={hymn} />
     </div>
   );
 }

@@ -3,18 +3,17 @@ import Link from "next/link";
 import HymnActions from "@/components/HymnActions";
 import type { IHymn } from "@/types/hymn";
 import type { Metadata } from "next";
+import { connectDB } from "@/lib/db";
+import Hymn from "@/lib/models/hymn";
 
 async function getHymn(number: string): Promise<IHymn | null> {
-  const res = await fetch(
-    new URL(
-      `/api/hymns/${number}`,
-      process.env.NEXT_PUBLIC_BASE_URL ?? "http://localhost:3000",
-    ).toString(),
-    { cache: "no-store" },
-  );
-  if (res.status === 404) return null;
-  if (!res.ok) throw new Error("Failed to fetch hymn");
-  return res.json();
+  await connectDB();
+
+  const hymnNumber = Number(number);
+  if (Number.isNaN(hymnNumber)) return null;
+
+  const hymn = await Hymn.findOne({ hymnNumber }, { _id: 0, __v: 0 }).lean();
+  return hymn as IHymn | null;
 }
 
 export async function generateMetadata({
