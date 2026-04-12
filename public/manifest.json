@@ -8,12 +8,12 @@
   "theme_color": "#2e3192",
   "icons": [
     {
-      "src": "/rccg_logo.png",
+      "src": "/spirit_songs_logo_192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "/rccg_logo.png",
+      "src": "/spirit_songs_logo_512.png",
       "sizes": "512x512",
       "type": "image/png"
     }

@@ -10,6 +10,7 @@
     "migrate": "npx tsx scripts/migrate.ts"
   },
   "dependencies": {
+    "cloudinary": "^2.9.0",
     "jspdf": "^4.2.1",
     "mongoose": "^9.4.1",
     "next": "16.2.3",

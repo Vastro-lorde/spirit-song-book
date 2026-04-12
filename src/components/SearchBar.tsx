@@ -3,7 +3,13 @@
 import { useRouter, useSearchParams } from "next/navigation";
 import { useRef, useEffect, useTransition } from "react";
 
-export default function SearchBar() {
+export default function SearchBar({
+  basePath = "/hymns",
+  placeholder = "Search hymns by title, number, or lyrics\u2026",
+}: {
+  basePath?: string;
+  placeholder?: string;
+}) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const inputRef = useRef<HTMLInputElement>(null);
@@ -25,7 +31,7 @@ export default function SearchBar() {
     }
     params.delete("page"); // reset pagination on new search
     startTransition(() => {
-      router.replace(`/hymns?${params.toString()}`);
+      router.replace(`${basePath}?${params.toString()}`);
     });
   }
 
@@ -34,7 +40,7 @@ export default function SearchBar() {
       <input
         ref={inputRef}
         type="search"
-        placeholder="Search hymns by title, number, or lyrics…"
+        placeholder={placeholder}
         defaultValue={q}
         onChange={(e) => handleChange(e.target.value)}
         className="w-full rounded-full border-2 border-rccg-navy/20 bg-white px-5 py-3 pr-12 text-sm text-rccg-dark-navy shadow-sm outline-none placeholder:text-gray-400 focus:border-rccg-navy focus:ring-2 focus:ring-rccg-navy/20 dark:border-white/20 dark:bg-white/10 dark:text-white dark:placeholder:text-white/50 dark:focus:border-white/50"

@@ -10,6 +10,14 @@ const songBooks = [
     href: "/hymns",
     logo: "/rccg_logo.png",
   },
+  {
+    id: "songs",
+    title: "Songs",
+    subtitle: "Praise & Worship Collection",
+    description: "Browse the collection of songs — search by title, number, or lyrics.",
+    href: "/songs",
+    logo: "/spirit_songs_logo.png",
+  },
 ];
 
 export default function Home() {
