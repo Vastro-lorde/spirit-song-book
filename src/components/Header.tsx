@@ -34,6 +34,12 @@ export default function Header() {
           >
             Songs
           </Link>
+          <Link
+            href="/about"
+            className="text-sm font-medium text-white/80 hover:text-white transition-colors"
+          >
+            About
+          </Link>
         </nav>
       </div>
     </header>
