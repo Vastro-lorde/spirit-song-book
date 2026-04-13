@@ -1,5 +1,6 @@
 import SearchBar from "@/components/SearchBar";
 import HymnCard from "@/components/HymnCard";
+import CategoryFilter from "@/components/CategoryFilter";
 import type { IHymnSummary } from "@/types/hymn";
 import { connectDB } from "@/lib/db";
 import Hymn from "@/lib/models/hymn";
@@ -97,31 +98,11 @@ export default async function HymnsPage({
         <SearchBar />
 
         {/* Category filter */}
-        <div className="flex flex-wrap gap-2">
-          <a
-            href="/hymns"
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-              !category
-                ? "bg-rccg-navy text-white"
-                : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20"
-            }`}
-          >
-            All
-          </a>
-          {categories.map((cat) => (
-            <a
-              key={cat}
-              href={`/hymns?category=${encodeURIComponent(cat)}${q ? `&q=${encodeURIComponent(q)}` : ""}`}
-              className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                category === cat
-                  ? "bg-rccg-green text-white"
-                  : "bg-gray-100 text-gray-600 hover:bg-gray-200 dark:bg-white/10 dark:text-white/70 dark:hover:bg-white/20"
-              }`}
-            >
-              {cat}
-            </a>
-          ))}
-        </div>
+        <CategoryFilter
+          categories={categories}
+          currentCategory={category}
+          currentQuery={q}
+        />
       </div>
 
       {/* Results info */}
