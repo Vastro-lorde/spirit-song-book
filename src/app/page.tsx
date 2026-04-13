@@ -1,5 +1,6 @@
 import Image from "next/image";
 import Link from "next/link";
+import OfflineDownload from "@/components/OfflineDownload";
 
 const songBooks = [
   {
@@ -96,6 +97,11 @@ export default function Home() {
             </Link>
           ))}
         </div>
+      </section>
+
+      {/* Offline Download */}
+      <section className="mx-auto mt-10 w-full max-w-lg">
+        <OfflineDownload />
       </section>
 
       {/* Coming Soon hint */}
