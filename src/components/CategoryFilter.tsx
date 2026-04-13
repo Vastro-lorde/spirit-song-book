@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 
 interface CategoryFilterProps {
   categories: string[];
@@ -26,7 +27,7 @@ export default function CategoryFilter({
   return (
     <div className="relative">
       <div className="flex items-center gap-2">
-        <a
+        <Link
           href="/hymns"
           className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
             !currentCategory
@@ -35,15 +36,15 @@ export default function CategoryFilter({
           }`}
         >
           All
-        </a>
+        </Link>
 
         {currentCategory && (
-          <a
+          <Link
             href={buildHref(currentCategory)}
             className="rounded-full bg-rccg-green px-3 py-1 text-xs font-medium text-white"
           >
             {currentCategory}
-          </a>
+          </Link>
         )}
 
         <button
@@ -101,7 +102,7 @@ export default function CategoryFilter({
 
             <div className="flex max-h-60 flex-wrap gap-2 overflow-y-auto">
               {categories.map((cat) => (
-                <a
+                <Link
                   key={cat}
                   href={buildHref(cat)}
                   onClick={() => setOpen(false)}
@@ -112,7 +113,7 @@ export default function CategoryFilter({
                   }`}
                 >
                   {cat}
-                </a>
+                </Link>
               ))}
             </div>
           </div>
