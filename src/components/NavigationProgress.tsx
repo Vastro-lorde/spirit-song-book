@@ -69,6 +69,9 @@ export default function NavigationProgress() {
       // Don't show for same-page navigation
       if (url.pathname === window.location.pathname && url.search === window.location.search) return;
 
+      // Don't show while offline download is in progress
+      if (document.documentElement.dataset.downloading) return;
+
       showBar();
     }
 

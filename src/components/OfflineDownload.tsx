@@ -57,6 +57,7 @@ export default function OfflineDownload() {
 
   const downloadAll = useCallback(async () => {
     setStatus("downloading");
+    document.documentElement.dataset.downloading = "true";
 
     try {
       // Phase 1: Collect all hymn & song numbers
@@ -109,6 +110,8 @@ export default function OfflineDownload() {
       setStatus("done");
     } catch {
       setStatus("error");
+    } finally {
+      delete document.documentElement.dataset.downloading;
     }
   }, []);
 
